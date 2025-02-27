@@ -34,7 +34,7 @@ Taker-BOT is a blockchain automation tool designed to interact with various cryp
 3. Edit wallets.txt file and input your private keys and wallet address (one per line)
 
    ```bash
-   nano wallets.txt
+   nano wallets.json
    ```
 
 ## Usage
