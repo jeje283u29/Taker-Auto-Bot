@@ -20,7 +20,7 @@ Taker-BOT is a blockchain automation tool designed to interact with various cryp
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/Kazuha787/Taker-Auto-Bot.git
+   git clone https://github.com/jeje283u29/Taker-Auto-Bot.git
    cd Taker-Auto-Bot
    ```
 
@@ -28,7 +28,6 @@ Taker-BOT is a blockchain automation tool designed to interact with various cryp
 
    ```bash
    npm install
-   npm install chalk@4
    ```
 
 3. Edit wallets.txt file and input your private keys and wallet address (one per line)
