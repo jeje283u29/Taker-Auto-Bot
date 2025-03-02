@@ -45,6 +45,7 @@ Taker-BOT is a blockchain automation tool designed to interact with various cryp
   ```
 
 - **Dashboard**: The dashboard will display real-time information about the bot's operations, Every 24 hours, network status
+- **Proxy** : use free proxy from webshare
 
 ## Dependencies
 
